@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "344566181772",
+    "project_id": "olamessenger-35c79",
+    "storage_bucket": "olamessenger-35c79.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344566181772:android:af09922339b8a3e11430a9",
+        "android_client_info": {
+          "package_name": "com.example.ola_messenger"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYsl5-tr1IUdMVf_J4ZKgJz0nYOQ7lGQU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
