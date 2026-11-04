@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ola_messenger/database/database.dart';
+import 'package:ola_messenger/model/conversa.dart';
+import 'package:ola_messenger/model/mensagem.dart';
 import 'package:ola_messenger/model/usuario.dart';
+import 'package:ola_messenger/model/usuario_conversa.dart';
 import 'package:ola_messenger/repository/repository.dart';
 
 class Storage extends ChangeNotifier{
@@ -46,6 +49,33 @@ class Storage extends ChangeNotifier{
   Future<void> atualizarListaTodosUsuarios()async{
     listaTodosUsuarios = await repository.pegarListaUsuarios();
     notifyListeners();
+  }
+
+  ////FUNÇÕES RELACIONADAS A USUARIOCONVERSA  
+  Future<void> adicionarUsuarioConversaLocal(UsuarioConversa usuarioConversa)async{
+    await repository.adicionarUsuarioConversaLocal(usuarioConversa);
+  }
+
+  Future<Conversa?> pegarConversaEntreDoisUsuariosLocal(String idUsuario01, String idUsuario02)async{
+    return await repository.pegarConversaEntreDoisUsuariosLocal(idUsuario01, idUsuario02);
+  }
+
+  ////FUNÇÕES RELACIONADAS A CONVERSA
+  Future<void> adicionarConversaLocal(Conversa conversa)async{
+    await repository.adicionarConversaLocal(conversa);
+  }
+
+  ////FUNÇÕES RELACIONADAS A MENSAGEM
+  Future<void> adicionarMensagemLocal(Mensagem mensagem)async{
+    await repository.adicionarMensagemLocal(mensagem);
+  }
+
+  Future<void> adicionarMensagemNuvem(Mensagem mensagem)async{
+    await repository.adicionarMensagemNuvem(mensagem);
+  }
+
+  Future<List<Mensagem>> buscarMensagensPorIdConversa(String idConversa) async{
+   return await repository.buscarMensagensPorIdConversa(idConversa);
   }
 
   ////FUNÇÕES RELACIONADAS A SINCRONIZAÇÃO
