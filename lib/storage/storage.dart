@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ola_messenger/database/database.dart';
 import 'package:ola_messenger/model/conversa.dart';
 import 'package:ola_messenger/model/mensagem.dart';
+import 'package:ola_messenger/model/status_mensagem_destinatario.dart';
 import 'package:ola_messenger/model/usuario.dart';
 import 'package:ola_messenger/model/usuario_conversa.dart';
 import 'package:ola_messenger/repository/repository.dart';
@@ -74,12 +76,57 @@ class Storage extends ChangeNotifier{
     await repository.adicionarMensagemNuvem(mensagem);
   }
 
-  Future<List<Mensagem>> buscarMensagensPorIdConversa(String idConversa) async{
-   return await repository.buscarMensagensPorIdConversa(idConversa);
+  Future<void> adicionarOuAtualizarMensagemNuvemParaLocal(Mensagem mensagem)async{
+    await repository.adicionarOuAtualizarMensagemNuvemParaLocal(mensagem);
+  }
+
+  Future<void> atualizarMensagemLocalSincronizadoTrue(Mensagem mensagem)async{
+    await repository.atualizarMensagemLocalSincronizadoTrue(mensagem);
+  }
+
+  Stream<List<Mensagem>> abrirStreamMensagensLocal (String idConversa){
+   return repository.abrirStreamMensagensLocal(idConversa);
+  }
+
+  Future<void> buscarTodasMensagensNuvemPorConversa(String idConversa)async{
+    await repository.buscarTodasMensagensNuvemPorConversa(idConversa);
+  }
+
+  Future<void> buscar100MensagensNuvemPorConversa(String idConversa)async{
+     await repository.buscar100MensagensNuvemPorConversa(idConversa);
+  }
+
+  Future<List<Mensagem>> buscarListaMensagensPorConversa(String idConversa) async{
+   return await repository.buscarListaMensagensPorConversa(idConversa);
+  }
+
+  Future<void> removerMensagemLocal(Mensagem mensagem) async {
+   await repository.removerMensagemLocal(mensagem);
+  }
+  
+   Stream<QuerySnapshot<Map<String, dynamic>>> abrirStreamMensagensPorIdConversa (String idConversa){
+   return repository.abrirStreamMensagensPorIdConversa(idConversa);
   }
 
   ////FUNÇÕES RELACIONADAS A SINCRONIZAÇÃO
   Future<void> sincronizarUsuarioNuvemParaLocal()async{
     await repository.sincronizarUsuarioNuvemParaLocal();
+  }
+
+  // FUNÇÕES RELACIONADAS A MENSAGEMDESTINATARIO
+  Future<void> adicionarMensagemDestinatarioLocal(StatusMensagemDestinatario mensagemDestinatario)async{
+   await repository.adicionarMensagemDestinatarioLocal(mensagemDestinatario);
+  }
+
+  Future<void> adicionarListaMensagemDestinatarioLocal(List<StatusMensagemDestinatario> listaMensagemDestinatario)async{
+   await repository.adicionarListaMensagemDestinatarioLocal(listaMensagemDestinatario);
+  }
+
+  Future<List<StatusMensagemDestinatario>> buscarListaTodosMensagemDestinatarioLocal()async{
+  return await repository.buscarListaTodosMensagemDestinatarioLocal();
+  }
+
+   Future<StatusMensagemDestinatario> buscarMensagemDestinatarioLocalPorIdsComposto(String idMensagem, String idDestinatario)async{
+   return await repository.buscarMensagemDestinatarioLocalPorIdsComposto(idMensagem, idDestinatario);
   }
 }

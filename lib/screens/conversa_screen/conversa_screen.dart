@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -24,12 +26,27 @@ class _ConversaScreenState extends State<ConversaScreen> {
   Conversa? conversaAnterior;
   bool? conversaNova;
   String? idConversa;
+  String? idRemetente;
+  late final Storage storage;
+  bool enviandoMensagemLocal = false;
+
+  Stream<QuerySnapshot<Map<String, dynamic>>>? streamMensagensNuvem;
+  Stream<List<Mensagem>>? streamMensagensLocal;
+
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>?
+  subscriptionMensagensNuvem;
+
+  StreamSubscription<List<Mensagem>>? subscriptionMensagensLocal;
 
   List<Mensagem> listaMensagensConversa = [];
 
   @override
   void initState() {
     super.initState();
+
+    storage = context.read<Storage>();
+
+    idRemetente = storage.pegarUsuario()!.uid;
 
     Future.microtask(() async {
       try {
@@ -47,13 +64,49 @@ class _ConversaScreenState extends State<ConversaScreen> {
 
         print('resultado idConversa: $idConversa');
 
-        final mensagens = await buscarMensagemConversa();
+        streamMensagensNuvem = storage.abrirStreamMensagensPorIdConversa(
+          idConversa!,
+        );
+
+        subscriptionMensagensNuvem = streamMensagensNuvem!.listen((
+          event,
+        ) async {
+          final documentos = event.docChanges;
+          for (final documento in documentos) {
+            final dado = documento.doc.data();
+            switch (documento.type) {
+              case DocumentChangeType.added:
+                if (dado == null || dado['idRemetente'] == idRemetente)
+                  continue;
+                await storage.adicionarOuAtualizarMensagemNuvemParaLocal(
+                  Mensagem.fromMap(dado),
+                );
+                break;
+              case DocumentChangeType.modified:
+                if (dado == null || dado['idRemetente'] == idRemetente)
+                  continue;
+                await storage.adicionarOuAtualizarMensagemNuvemParaLocal(
+                  Mensagem.fromMap(dado),
+                );
+                break;
+              case DocumentChangeType.removed:
+                if (dado == null || dado['idRemetente'] == idRemetente)
+                  continue;
+                await storage.removerMensagemLocal(Mensagem.fromMap(dado));
+                break;
+            }
+          }
+        });
+        streamMensagensLocal = storage.abrirStreamMensagensLocal(idConversa!);
+
+        subscriptionMensagensLocal = streamMensagensLocal!.listen((mensagens) {
+          if (!mounted) return;
+          setState(() {
+            listaMensagensConversa = mensagens;
+          });
+        });
 
         if (!mounted) return;
-
-        setState(() {
-          listaMensagensConversa = mensagens;
-        });
       } catch (e) {
         debugPrint('Erro ao inicializar conversa: $e');
       }
@@ -63,6 +116,8 @@ class _ConversaScreenState extends State<ConversaScreen> {
   @override
   void dispose() {
     mensagemController.dispose();
+    subscriptionMensagensLocal?.cancel();
+    subscriptionMensagensNuvem?.cancel();
     super.dispose();
   }
 
@@ -84,17 +139,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
               Expanded(child: TextFormField(controller: mensagemController)),
               IconButton(
                 onPressed: () {
-                  String idMensagem = const Uuid().v4();
-                  Mensagem mensagem = Mensagem(
-                    idMensagem: idMensagem,
-                    texto: mensagemController.text,
-                    idConversa: idConversa!,
-                    horarioEnvio: DateTime.now(),
-                    sincronizado: false,
-                    statusMensagem: StatusMensagem.pendente,
-                    idRemetente: context.read<Storage>().pegarUsuario()!.uid,
-                  );
-                  enviarMensagem(mensagem);
+                  enviarMensagem();
                 },
                 icon: Icon(Icons.send_rounded, color: Colors.green),
               ),
@@ -105,16 +150,25 @@ class _ConversaScreenState extends State<ConversaScreen> {
     );
   }
 
-  Future<void> enviarMensagem(Mensagem mensagem) async {
+  Future<void> enviarMensagem() async {
     if (conversaNova == null) return;
+    if (enviandoMensagemLocal == true) return;
 
     final texto = mensagemController.text.trim();
     if (texto.isEmpty) return;
-
-    listaMensagensConversa.add(mensagem);
-    setState(() {});
+    String idMensagem = const Uuid().v4();
+    Mensagem mensagem = Mensagem(
+      idMensagem: idMensagem,
+      texto: mensagemController.text,
+      idConversa: idConversa!,
+      horarioEnvio: DateTime.now(),
+      sincronizado: false,
+      statusMensagem: StatusMensagem.pendente,
+      idRemetente: storage.pegarUsuario()!.uid,
+    );
 
     try {
+      enviandoMensagemLocal = true;
       if (conversaNova == true) {
         await adicionarConversaLocal();
         await adicionarUsuarioConversaLocal();
@@ -124,20 +178,24 @@ class _ConversaScreenState extends State<ConversaScreen> {
       } else {
         await adicionarMensagemLocal(mensagem);
       }
-
       mensagemController.clear();
     } catch (e) {
       debugPrint('Erro ao enviar mensagem: $e');
-    } finally {}
+      return;
+    } finally {
+      enviandoMensagemLocal = false;
+    }
 
     try {
+      mensagem.sincronizado = true;
+
+      await storage.adicionarMensagemNuvem(mensagem);
+
       mensagem.statusMensagem = StatusMensagem.enviada;
-      if (!mounted) return;
-      context.read<Storage>().adicionarMensagemNuvem(mensagem);
+      await storage.adicionarOuAtualizarMensagemNuvemParaLocal(mensagem);
     } catch (e) {
+      mensagem.sincronizado = false;
       print('erro ao enviar mensagem para a nuvem: $e');
-    } finally {
-      setState(() {});
     }
   }
 
@@ -146,7 +204,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
   }
 
   Future<void> adicionarUsuarioConversaLocal() async {
-    User? user = context.read<Storage>().pegarUsuario();
+    User? user = storage.pegarUsuario();
     final usuarioConversaRemetente = UsuarioConversa(
       idUsuario: user!.uid,
       idConversa: idConversa!,
@@ -157,32 +215,28 @@ class _ConversaScreenState extends State<ConversaScreen> {
       idConversa: idConversa!,
       sincronizado: false,
     );
-    await context.read<Storage>().adicionarUsuarioConversaLocal(
-      usuarioConversaRemetente,
-    );
-    await context.read<Storage>().adicionarUsuarioConversaLocal(
-      usuarioConversaDestinatario,
-    );
+    await storage.adicionarUsuarioConversaLocal(usuarioConversaRemetente);
+    await storage.adicionarUsuarioConversaLocal(usuarioConversaDestinatario);
   }
 
   Future<void> adicionarConversaLocal() async {
-    await context.read<Storage>().adicionarConversaLocal(
+    await storage.adicionarConversaLocal(
       Conversa(isGrupo: false, idConversa: idConversa!, sincronizado: false),
     );
   }
 
   Future<void> adicionarMensagemLocal(Mensagem mensagem) async {
-    await context.read<Storage>().adicionarMensagemLocal(mensagem);
+    await storage.adicionarMensagemLocal(mensagem);
   }
 
   Future<Conversa?> buscarConversaAnterior() async {
-    final user = context.read<Storage>().pegarUsuario();
+    final user = storage.pegarUsuario();
 
     if (user == null) {
       throw StateError('Usuário não autenticado');
     }
 
-    return await context.read<Storage>().pegarConversaEntreDoisUsuariosLocal(
+    return await storage.pegarConversaEntreDoisUsuariosLocal(
       user.uid,
       widget.destinatario.idUsuario,
     );
@@ -190,9 +244,7 @@ class _ConversaScreenState extends State<ConversaScreen> {
 
   Future<List<Mensagem>> buscarMensagemConversa() async {
     if (idConversa != null) {
-      return await context.read<Storage>().buscarMensagensPorIdConversa(
-        idConversa!,
-      );
+      return await storage.buscarListaMensagensPorConversa(idConversa!);
     } else {
       return [];
     }

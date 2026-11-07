@@ -6,10 +6,8 @@ class Mensagem {
   String idMensagem;
   String idRemetente;
   String idConversa;
-  String texto;
-  DateTime horarioEnvio;
-  DateTime? horarioEntregue;
-  DateTime? horarioLeitura;
+  String texto;  
+  DateTime horarioEnvio; 
   StatusMensagem statusMensagem;
   bool sincronizado;
 
@@ -19,8 +17,6 @@ class Mensagem {
     required this.texto,
     required this.idConversa,
     required this.horarioEnvio,
-    this.horarioEntregue,
-    this.horarioLeitura,
     required this.statusMensagem,
     required this.sincronizado,
   });
@@ -35,13 +31,7 @@ class Mensagem {
       horarioEnvio:
           (map['horarioEnvio'] as Timestamp).toDate(),
 
-      horarioEntregue: map['horarioEntregue'] != null
-          ? (map['horarioEntregue'] as Timestamp).toDate()
-          : null,
-
-      horarioLeitura: map['horarioLeitura'] != null
-          ? (map['horarioLeitura'] as Timestamp).toDate()
-          : null,
+        
 
       statusMensagem: StatusMensagem.values.byName(
         map['statusMensagem'] as String,
@@ -58,8 +48,6 @@ class Mensagem {
       'idConversa': idConversa,
       'conteudo': texto,
       'horarioEnvio': horarioEnvio,
-      'horarioEntregue': horarioEntregue,
-      'horarioLeitura': horarioLeitura,
       'statusMensagem': statusMensagem.name,
       'sincronizado': sincronizado,
     };

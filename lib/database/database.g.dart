@@ -935,6 +935,20 @@ class $MensagemTabelaTable extends MensagemTabela
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _idRemetenteMeta = const VerificationMeta(
+    'idRemetente',
+  );
+  @override
+  late final GeneratedColumn<String> idRemetente = GeneratedColumn<String>(
+    'id_remetente',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES usuario_tabela (id_usuario)',
+    ),
+  );
   static const VerificationMeta _idConversaMeta = const VerificationMeta(
     'idConversa',
   );
@@ -969,6 +983,17 @@ class $MensagemTabelaTable extends MensagemTabela
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _statusMensagemMeta = const VerificationMeta(
+    'statusMensagem',
+  );
+  @override
+  late final GeneratedColumn<String> statusMensagem = GeneratedColumn<String>(
+    'status_mensagem',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _sincronizadoMeta = const VerificationMeta(
     'sincronizado',
   );
@@ -986,9 +1011,11 @@ class $MensagemTabelaTable extends MensagemTabela
   @override
   List<GeneratedColumn> get $columns => [
     idMensagem,
+    idRemetente,
     idConversa,
     texto,
     horarioEnvio,
+    statusMensagem,
     sincronizado,
   ];
   @override
@@ -1010,6 +1037,17 @@ class $MensagemTabelaTable extends MensagemTabela
       );
     } else if (isInserting) {
       context.missing(_idMensagemMeta);
+    }
+    if (data.containsKey('id_remetente')) {
+      context.handle(
+        _idRemetenteMeta,
+        idRemetente.isAcceptableOrUnknown(
+          data['id_remetente']!,
+          _idRemetenteMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_idRemetenteMeta);
     }
     if (data.containsKey('id_conversa')) {
       context.handle(
@@ -1038,6 +1076,17 @@ class $MensagemTabelaTable extends MensagemTabela
     } else if (isInserting) {
       context.missing(_horarioEnvioMeta);
     }
+    if (data.containsKey('status_mensagem')) {
+      context.handle(
+        _statusMensagemMeta,
+        statusMensagem.isAcceptableOrUnknown(
+          data['status_mensagem']!,
+          _statusMensagemMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMensagemMeta);
+    }
     if (data.containsKey('sincronizado')) {
       context.handle(
         _sincronizadoMeta,
@@ -1062,6 +1111,10 @@ class $MensagemTabelaTable extends MensagemTabela
         DriftSqlType.string,
         data['${effectivePrefix}id_mensagem'],
       )!,
+      idRemetente: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id_remetente'],
+      )!,
       idConversa: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_conversa'],
@@ -1073,6 +1126,10 @@ class $MensagemTabelaTable extends MensagemTabela
       horarioEnvio: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}horario_envio'],
+      )!,
+      statusMensagem: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status_mensagem'],
       )!,
       sincronizado: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
@@ -1090,24 +1147,30 @@ class $MensagemTabelaTable extends MensagemTabela
 class MensagemTabelaData extends DataClass
     implements Insertable<MensagemTabelaData> {
   final String idMensagem;
+  final String idRemetente;
   final String idConversa;
   final String texto;
   final DateTime horarioEnvio;
+  final String statusMensagem;
   final bool sincronizado;
   const MensagemTabelaData({
     required this.idMensagem,
+    required this.idRemetente,
     required this.idConversa,
     required this.texto,
     required this.horarioEnvio,
+    required this.statusMensagem,
     required this.sincronizado,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id_mensagem'] = Variable<String>(idMensagem);
+    map['id_remetente'] = Variable<String>(idRemetente);
     map['id_conversa'] = Variable<String>(idConversa);
     map['texto'] = Variable<String>(texto);
     map['horario_envio'] = Variable<DateTime>(horarioEnvio);
+    map['status_mensagem'] = Variable<String>(statusMensagem);
     map['sincronizado'] = Variable<bool>(sincronizado);
     return map;
   }
@@ -1115,9 +1178,11 @@ class MensagemTabelaData extends DataClass
   MensagemTabelaCompanion toCompanion(bool nullToAbsent) {
     return MensagemTabelaCompanion(
       idMensagem: Value(idMensagem),
+      idRemetente: Value(idRemetente),
       idConversa: Value(idConversa),
       texto: Value(texto),
       horarioEnvio: Value(horarioEnvio),
+      statusMensagem: Value(statusMensagem),
       sincronizado: Value(sincronizado),
     );
   }
@@ -1129,9 +1194,11 @@ class MensagemTabelaData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MensagemTabelaData(
       idMensagem: serializer.fromJson<String>(json['idMensagem']),
+      idRemetente: serializer.fromJson<String>(json['idRemetente']),
       idConversa: serializer.fromJson<String>(json['idConversa']),
       texto: serializer.fromJson<String>(json['texto']),
       horarioEnvio: serializer.fromJson<DateTime>(json['horarioEnvio']),
+      statusMensagem: serializer.fromJson<String>(json['statusMensagem']),
       sincronizado: serializer.fromJson<bool>(json['sincronizado']),
     );
   }
@@ -1140,24 +1207,30 @@ class MensagemTabelaData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'idMensagem': serializer.toJson<String>(idMensagem),
+      'idRemetente': serializer.toJson<String>(idRemetente),
       'idConversa': serializer.toJson<String>(idConversa),
       'texto': serializer.toJson<String>(texto),
       'horarioEnvio': serializer.toJson<DateTime>(horarioEnvio),
+      'statusMensagem': serializer.toJson<String>(statusMensagem),
       'sincronizado': serializer.toJson<bool>(sincronizado),
     };
   }
 
   MensagemTabelaData copyWith({
     String? idMensagem,
+    String? idRemetente,
     String? idConversa,
     String? texto,
     DateTime? horarioEnvio,
+    String? statusMensagem,
     bool? sincronizado,
   }) => MensagemTabelaData(
     idMensagem: idMensagem ?? this.idMensagem,
+    idRemetente: idRemetente ?? this.idRemetente,
     idConversa: idConversa ?? this.idConversa,
     texto: texto ?? this.texto,
     horarioEnvio: horarioEnvio ?? this.horarioEnvio,
+    statusMensagem: statusMensagem ?? this.statusMensagem,
     sincronizado: sincronizado ?? this.sincronizado,
   );
   MensagemTabelaData copyWithCompanion(MensagemTabelaCompanion data) {
@@ -1165,6 +1238,9 @@ class MensagemTabelaData extends DataClass
       idMensagem: data.idMensagem.present
           ? data.idMensagem.value
           : this.idMensagem,
+      idRemetente: data.idRemetente.present
+          ? data.idRemetente.value
+          : this.idRemetente,
       idConversa: data.idConversa.present
           ? data.idConversa.value
           : this.idConversa,
@@ -1172,6 +1248,9 @@ class MensagemTabelaData extends DataClass
       horarioEnvio: data.horarioEnvio.present
           ? data.horarioEnvio.value
           : this.horarioEnvio,
+      statusMensagem: data.statusMensagem.present
+          ? data.statusMensagem.value
+          : this.statusMensagem,
       sincronizado: data.sincronizado.present
           ? data.sincronizado.value
           : this.sincronizado,
@@ -1182,68 +1261,91 @@ class MensagemTabelaData extends DataClass
   String toString() {
     return (StringBuffer('MensagemTabelaData(')
           ..write('idMensagem: $idMensagem, ')
+          ..write('idRemetente: $idRemetente, ')
           ..write('idConversa: $idConversa, ')
           ..write('texto: $texto, ')
           ..write('horarioEnvio: $horarioEnvio, ')
+          ..write('statusMensagem: $statusMensagem, ')
           ..write('sincronizado: $sincronizado')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(idMensagem, idConversa, texto, horarioEnvio, sincronizado);
+  int get hashCode => Object.hash(
+    idMensagem,
+    idRemetente,
+    idConversa,
+    texto,
+    horarioEnvio,
+    statusMensagem,
+    sincronizado,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MensagemTabelaData &&
           other.idMensagem == this.idMensagem &&
+          other.idRemetente == this.idRemetente &&
           other.idConversa == this.idConversa &&
           other.texto == this.texto &&
           other.horarioEnvio == this.horarioEnvio &&
+          other.statusMensagem == this.statusMensagem &&
           other.sincronizado == this.sincronizado);
 }
 
 class MensagemTabelaCompanion extends UpdateCompanion<MensagemTabelaData> {
   final Value<String> idMensagem;
+  final Value<String> idRemetente;
   final Value<String> idConversa;
   final Value<String> texto;
   final Value<DateTime> horarioEnvio;
+  final Value<String> statusMensagem;
   final Value<bool> sincronizado;
   final Value<int> rowid;
   const MensagemTabelaCompanion({
     this.idMensagem = const Value.absent(),
+    this.idRemetente = const Value.absent(),
     this.idConversa = const Value.absent(),
     this.texto = const Value.absent(),
     this.horarioEnvio = const Value.absent(),
+    this.statusMensagem = const Value.absent(),
     this.sincronizado = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MensagemTabelaCompanion.insert({
     required String idMensagem,
+    required String idRemetente,
     required String idConversa,
     required String texto,
     required DateTime horarioEnvio,
+    required String statusMensagem,
     required bool sincronizado,
     this.rowid = const Value.absent(),
   }) : idMensagem = Value(idMensagem),
+       idRemetente = Value(idRemetente),
        idConversa = Value(idConversa),
        texto = Value(texto),
        horarioEnvio = Value(horarioEnvio),
+       statusMensagem = Value(statusMensagem),
        sincronizado = Value(sincronizado);
   static Insertable<MensagemTabelaData> custom({
     Expression<String>? idMensagem,
+    Expression<String>? idRemetente,
     Expression<String>? idConversa,
     Expression<String>? texto,
     Expression<DateTime>? horarioEnvio,
+    Expression<String>? statusMensagem,
     Expression<bool>? sincronizado,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (idMensagem != null) 'id_mensagem': idMensagem,
+      if (idRemetente != null) 'id_remetente': idRemetente,
       if (idConversa != null) 'id_conversa': idConversa,
       if (texto != null) 'texto': texto,
       if (horarioEnvio != null) 'horario_envio': horarioEnvio,
+      if (statusMensagem != null) 'status_mensagem': statusMensagem,
       if (sincronizado != null) 'sincronizado': sincronizado,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1251,17 +1353,21 @@ class MensagemTabelaCompanion extends UpdateCompanion<MensagemTabelaData> {
 
   MensagemTabelaCompanion copyWith({
     Value<String>? idMensagem,
+    Value<String>? idRemetente,
     Value<String>? idConversa,
     Value<String>? texto,
     Value<DateTime>? horarioEnvio,
+    Value<String>? statusMensagem,
     Value<bool>? sincronizado,
     Value<int>? rowid,
   }) {
     return MensagemTabelaCompanion(
       idMensagem: idMensagem ?? this.idMensagem,
+      idRemetente: idRemetente ?? this.idRemetente,
       idConversa: idConversa ?? this.idConversa,
       texto: texto ?? this.texto,
       horarioEnvio: horarioEnvio ?? this.horarioEnvio,
+      statusMensagem: statusMensagem ?? this.statusMensagem,
       sincronizado: sincronizado ?? this.sincronizado,
       rowid: rowid ?? this.rowid,
     );
@@ -1273,6 +1379,9 @@ class MensagemTabelaCompanion extends UpdateCompanion<MensagemTabelaData> {
     if (idMensagem.present) {
       map['id_mensagem'] = Variable<String>(idMensagem.value);
     }
+    if (idRemetente.present) {
+      map['id_remetente'] = Variable<String>(idRemetente.value);
+    }
     if (idConversa.present) {
       map['id_conversa'] = Variable<String>(idConversa.value);
     }
@@ -1281,6 +1390,9 @@ class MensagemTabelaCompanion extends UpdateCompanion<MensagemTabelaData> {
     }
     if (horarioEnvio.present) {
       map['horario_envio'] = Variable<DateTime>(horarioEnvio.value);
+    }
+    if (statusMensagem.present) {
+      map['status_mensagem'] = Variable<String>(statusMensagem.value);
     }
     if (sincronizado.present) {
       map['sincronizado'] = Variable<bool>(sincronizado.value);
@@ -1295,9 +1407,433 @@ class MensagemTabelaCompanion extends UpdateCompanion<MensagemTabelaData> {
   String toString() {
     return (StringBuffer('MensagemTabelaCompanion(')
           ..write('idMensagem: $idMensagem, ')
+          ..write('idRemetente: $idRemetente, ')
           ..write('idConversa: $idConversa, ')
           ..write('texto: $texto, ')
           ..write('horarioEnvio: $horarioEnvio, ')
+          ..write('statusMensagem: $statusMensagem, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $StatusMensagemDestinatarioTabelaTable
+    extends StatusMensagemDestinatarioTabela
+    with
+        TableInfo<
+          $StatusMensagemDestinatarioTabelaTable,
+          StatusMensagemDestinatarioTabelaData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StatusMensagemDestinatarioTabelaTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idDestinatarioMeta = const VerificationMeta(
+    'idDestinatario',
+  );
+  @override
+  late final GeneratedColumn<String> idDestinatario = GeneratedColumn<String>(
+    'id_destinatario',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES usuario_tabela (id_usuario)',
+    ),
+  );
+  static const VerificationMeta _idMensagemMeta = const VerificationMeta(
+    'idMensagem',
+  );
+  @override
+  late final GeneratedColumn<String> idMensagem = GeneratedColumn<String>(
+    'id_mensagem',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES mensagem_tabela (id_mensagem)',
+    ),
+  );
+  static const VerificationMeta _horarioRecebimentoMeta =
+      const VerificationMeta('horarioRecebimento');
+  @override
+  late final GeneratedColumn<DateTime> horarioRecebimento =
+      GeneratedColumn<DateTime>(
+        'horario_recebimento',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _horarioLidoMeta = const VerificationMeta(
+    'horarioLido',
+  );
+  @override
+  late final GeneratedColumn<DateTime> horarioLido = GeneratedColumn<DateTime>(
+    'horario_lido',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sincronizadoMeta = const VerificationMeta(
+    'sincronizado',
+  );
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+    'sincronizado',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("sincronizado" IN (0, 1))',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    idDestinatario,
+    idMensagem,
+    horarioRecebimento,
+    horarioLido,
+    sincronizado,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'status_mensagem_destinatario_tabela';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StatusMensagemDestinatarioTabelaData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id_destinatario')) {
+      context.handle(
+        _idDestinatarioMeta,
+        idDestinatario.isAcceptableOrUnknown(
+          data['id_destinatario']!,
+          _idDestinatarioMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_idDestinatarioMeta);
+    }
+    if (data.containsKey('id_mensagem')) {
+      context.handle(
+        _idMensagemMeta,
+        idMensagem.isAcceptableOrUnknown(data['id_mensagem']!, _idMensagemMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_idMensagemMeta);
+    }
+    if (data.containsKey('horario_recebimento')) {
+      context.handle(
+        _horarioRecebimentoMeta,
+        horarioRecebimento.isAcceptableOrUnknown(
+          data['horario_recebimento']!,
+          _horarioRecebimentoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('horario_lido')) {
+      context.handle(
+        _horarioLidoMeta,
+        horarioLido.isAcceptableOrUnknown(
+          data['horario_lido']!,
+          _horarioLidoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+        _sincronizadoMeta,
+        sincronizado.isAcceptableOrUnknown(
+          data['sincronizado']!,
+          _sincronizadoMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sincronizadoMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {idMensagem, idDestinatario};
+  @override
+  StatusMensagemDestinatarioTabelaData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StatusMensagemDestinatarioTabelaData(
+      idDestinatario: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id_destinatario'],
+      )!,
+      idMensagem: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id_mensagem'],
+      )!,
+      horarioRecebimento: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}horario_recebimento'],
+      ),
+      horarioLido: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}horario_lido'],
+      ),
+      sincronizado: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}sincronizado'],
+      )!,
+    );
+  }
+
+  @override
+  $StatusMensagemDestinatarioTabelaTable createAlias(String alias) {
+    return $StatusMensagemDestinatarioTabelaTable(attachedDatabase, alias);
+  }
+}
+
+class StatusMensagemDestinatarioTabelaData extends DataClass
+    implements Insertable<StatusMensagemDestinatarioTabelaData> {
+  final String idDestinatario;
+  final String idMensagem;
+  final DateTime? horarioRecebimento;
+  final DateTime? horarioLido;
+  final bool sincronizado;
+  const StatusMensagemDestinatarioTabelaData({
+    required this.idDestinatario,
+    required this.idMensagem,
+    this.horarioRecebimento,
+    this.horarioLido,
+    required this.sincronizado,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id_destinatario'] = Variable<String>(idDestinatario);
+    map['id_mensagem'] = Variable<String>(idMensagem);
+    if (!nullToAbsent || horarioRecebimento != null) {
+      map['horario_recebimento'] = Variable<DateTime>(horarioRecebimento);
+    }
+    if (!nullToAbsent || horarioLido != null) {
+      map['horario_lido'] = Variable<DateTime>(horarioLido);
+    }
+    map['sincronizado'] = Variable<bool>(sincronizado);
+    return map;
+  }
+
+  StatusMensagemDestinatarioTabelaCompanion toCompanion(bool nullToAbsent) {
+    return StatusMensagemDestinatarioTabelaCompanion(
+      idDestinatario: Value(idDestinatario),
+      idMensagem: Value(idMensagem),
+      horarioRecebimento: horarioRecebimento == null && nullToAbsent
+          ? const Value.absent()
+          : Value(horarioRecebimento),
+      horarioLido: horarioLido == null && nullToAbsent
+          ? const Value.absent()
+          : Value(horarioLido),
+      sincronizado: Value(sincronizado),
+    );
+  }
+
+  factory StatusMensagemDestinatarioTabelaData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StatusMensagemDestinatarioTabelaData(
+      idDestinatario: serializer.fromJson<String>(json['idDestinatario']),
+      idMensagem: serializer.fromJson<String>(json['idMensagem']),
+      horarioRecebimento: serializer.fromJson<DateTime?>(
+        json['horarioRecebimento'],
+      ),
+      horarioLido: serializer.fromJson<DateTime?>(json['horarioLido']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'idDestinatario': serializer.toJson<String>(idDestinatario),
+      'idMensagem': serializer.toJson<String>(idMensagem),
+      'horarioRecebimento': serializer.toJson<DateTime?>(horarioRecebimento),
+      'horarioLido': serializer.toJson<DateTime?>(horarioLido),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
+    };
+  }
+
+  StatusMensagemDestinatarioTabelaData copyWith({
+    String? idDestinatario,
+    String? idMensagem,
+    Value<DateTime?> horarioRecebimento = const Value.absent(),
+    Value<DateTime?> horarioLido = const Value.absent(),
+    bool? sincronizado,
+  }) => StatusMensagemDestinatarioTabelaData(
+    idDestinatario: idDestinatario ?? this.idDestinatario,
+    idMensagem: idMensagem ?? this.idMensagem,
+    horarioRecebimento: horarioRecebimento.present
+        ? horarioRecebimento.value
+        : this.horarioRecebimento,
+    horarioLido: horarioLido.present ? horarioLido.value : this.horarioLido,
+    sincronizado: sincronizado ?? this.sincronizado,
+  );
+  StatusMensagemDestinatarioTabelaData copyWithCompanion(
+    StatusMensagemDestinatarioTabelaCompanion data,
+  ) {
+    return StatusMensagemDestinatarioTabelaData(
+      idDestinatario: data.idDestinatario.present
+          ? data.idDestinatario.value
+          : this.idDestinatario,
+      idMensagem: data.idMensagem.present
+          ? data.idMensagem.value
+          : this.idMensagem,
+      horarioRecebimento: data.horarioRecebimento.present
+          ? data.horarioRecebimento.value
+          : this.horarioRecebimento,
+      horarioLido: data.horarioLido.present
+          ? data.horarioLido.value
+          : this.horarioLido,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StatusMensagemDestinatarioTabelaData(')
+          ..write('idDestinatario: $idDestinatario, ')
+          ..write('idMensagem: $idMensagem, ')
+          ..write('horarioRecebimento: $horarioRecebimento, ')
+          ..write('horarioLido: $horarioLido, ')
+          ..write('sincronizado: $sincronizado')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    idDestinatario,
+    idMensagem,
+    horarioRecebimento,
+    horarioLido,
+    sincronizado,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StatusMensagemDestinatarioTabelaData &&
+          other.idDestinatario == this.idDestinatario &&
+          other.idMensagem == this.idMensagem &&
+          other.horarioRecebimento == this.horarioRecebimento &&
+          other.horarioLido == this.horarioLido &&
+          other.sincronizado == this.sincronizado);
+}
+
+class StatusMensagemDestinatarioTabelaCompanion
+    extends UpdateCompanion<StatusMensagemDestinatarioTabelaData> {
+  final Value<String> idDestinatario;
+  final Value<String> idMensagem;
+  final Value<DateTime?> horarioRecebimento;
+  final Value<DateTime?> horarioLido;
+  final Value<bool> sincronizado;
+  final Value<int> rowid;
+  const StatusMensagemDestinatarioTabelaCompanion({
+    this.idDestinatario = const Value.absent(),
+    this.idMensagem = const Value.absent(),
+    this.horarioRecebimento = const Value.absent(),
+    this.horarioLido = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StatusMensagemDestinatarioTabelaCompanion.insert({
+    required String idDestinatario,
+    required String idMensagem,
+    this.horarioRecebimento = const Value.absent(),
+    this.horarioLido = const Value.absent(),
+    required bool sincronizado,
+    this.rowid = const Value.absent(),
+  }) : idDestinatario = Value(idDestinatario),
+       idMensagem = Value(idMensagem),
+       sincronizado = Value(sincronizado);
+  static Insertable<StatusMensagemDestinatarioTabelaData> custom({
+    Expression<String>? idDestinatario,
+    Expression<String>? idMensagem,
+    Expression<DateTime>? horarioRecebimento,
+    Expression<DateTime>? horarioLido,
+    Expression<bool>? sincronizado,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (idDestinatario != null) 'id_destinatario': idDestinatario,
+      if (idMensagem != null) 'id_mensagem': idMensagem,
+      if (horarioRecebimento != null) 'horario_recebimento': horarioRecebimento,
+      if (horarioLido != null) 'horario_lido': horarioLido,
+      if (sincronizado != null) 'sincronizado': sincronizado,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StatusMensagemDestinatarioTabelaCompanion copyWith({
+    Value<String>? idDestinatario,
+    Value<String>? idMensagem,
+    Value<DateTime?>? horarioRecebimento,
+    Value<DateTime?>? horarioLido,
+    Value<bool>? sincronizado,
+    Value<int>? rowid,
+  }) {
+    return StatusMensagemDestinatarioTabelaCompanion(
+      idDestinatario: idDestinatario ?? this.idDestinatario,
+      idMensagem: idMensagem ?? this.idMensagem,
+      horarioRecebimento: horarioRecebimento ?? this.horarioRecebimento,
+      horarioLido: horarioLido ?? this.horarioLido,
+      sincronizado: sincronizado ?? this.sincronizado,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (idDestinatario.present) {
+      map['id_destinatario'] = Variable<String>(idDestinatario.value);
+    }
+    if (idMensagem.present) {
+      map['id_mensagem'] = Variable<String>(idMensagem.value);
+    }
+    if (horarioRecebimento.present) {
+      map['horario_recebimento'] = Variable<DateTime>(horarioRecebimento.value);
+    }
+    if (horarioLido.present) {
+      map['horario_lido'] = Variable<DateTime>(horarioLido.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StatusMensagemDestinatarioTabelaCompanion(')
+          ..write('idDestinatario: $idDestinatario, ')
+          ..write('idMensagem: $idMensagem, ')
+          ..write('horarioRecebimento: $horarioRecebimento, ')
+          ..write('horarioLido: $horarioLido, ')
           ..write('sincronizado: $sincronizado, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1313,6 +1849,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UsuarioConversaTabelaTable usuarioConversaTabela =
       $UsuarioConversaTabelaTable(this);
   late final $MensagemTabelaTable mensagemTabela = $MensagemTabelaTable(this);
+  late final $StatusMensagemDestinatarioTabelaTable
+  statusMensagemDestinatarioTabela = $StatusMensagemDestinatarioTabelaTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1322,6 +1862,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     conversaTabela,
     usuarioConversaTabela,
     mensagemTabela,
+    statusMensagemDestinatarioTabela,
   ];
 }
 
@@ -1381,6 +1922,58 @@ final class $$UsuarioTabelaTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$MensagemTabelaTable, List<MensagemTabelaData>>
+  _mensagemTabelaRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.mensagemTabela,
+    aliasName: 'usuario_tabela__id_usuario__mensagem_tabela__id_remetente',
+  );
+
+  $$MensagemTabelaTableProcessedTableManager get mensagemTabelaRefs {
+    final manager = $$MensagemTabelaTableTableManager($_db, $_db.mensagemTabela)
+        .filter(
+          (f) => f.idRemetente.idUsuario.sqlEquals(
+            $_itemColumn<String>('id_usuario')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_mensagemTabelaRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $StatusMensagemDestinatarioTabelaTable,
+    List<StatusMensagemDestinatarioTabelaData>
+  >
+  _statusMensagemDestinatarioTabelaRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.statusMensagemDestinatarioTabela,
+    aliasName:
+        'usuario_tabela__id_usuario__status_mensagem_destinatario_tabela__id_destinatario',
+  );
+
+  $$StatusMensagemDestinatarioTabelaTableProcessedTableManager
+  get statusMensagemDestinatarioTabelaRefs {
+    final manager =
+        $$StatusMensagemDestinatarioTabelaTableTableManager(
+          $_db,
+          $_db.statusMensagemDestinatarioTabela,
+        ).filter(
+          (f) => f.idDestinatario.idUsuario.sqlEquals(
+            $_itemColumn<String>('id_usuario')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _statusMensagemDestinatarioTabelaRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$UsuarioTabelaTableFilterComposer
@@ -1429,6 +2022,60 @@ class $$UsuarioTabelaTableFilterComposer
               }) => $$UsuarioConversaTabelaTableFilterComposer(
                 $db: $db,
                 $table: $db.usuarioConversaTabela,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+
+  Expression<bool> mensagemTabelaRefs(
+    Expression<bool> Function($$MensagemTabelaTableFilterComposer f) f,
+  ) {
+    final $$MensagemTabelaTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idUsuario,
+      referencedTable: $db.mensagemTabela,
+      getReferencedColumn: (t) => t.idRemetente,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MensagemTabelaTableFilterComposer(
+            $db: $db,
+            $table: $db.mensagemTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> statusMensagemDestinatarioTabelaRefs(
+    Expression<bool> Function(
+      $$StatusMensagemDestinatarioTabelaTableFilterComposer f,
+    )
+    f,
+  ) {
+    final $$StatusMensagemDestinatarioTabelaTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.idUsuario,
+          referencedTable: $db.statusMensagemDestinatarioTabela,
+          getReferencedColumn: (t) => t.idDestinatario,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$StatusMensagemDestinatarioTabelaTableFilterComposer(
+                $db: $db,
+                $table: $db.statusMensagemDestinatarioTabela,
                 $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                 joinBuilder: joinBuilder,
                 $removeJoinBuilderFromRootComposer:
@@ -1521,6 +2168,60 @@ class $$UsuarioTabelaTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> mensagemTabelaRefs<T extends Object>(
+    Expression<T> Function($$MensagemTabelaTableAnnotationComposer a) f,
+  ) {
+    final $$MensagemTabelaTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idUsuario,
+      referencedTable: $db.mensagemTabela,
+      getReferencedColumn: (t) => t.idRemetente,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MensagemTabelaTableAnnotationComposer(
+            $db: $db,
+            $table: $db.mensagemTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> statusMensagemDestinatarioTabelaRefs<T extends Object>(
+    Expression<T> Function(
+      $$StatusMensagemDestinatarioTabelaTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$StatusMensagemDestinatarioTabelaTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.idUsuario,
+          referencedTable: $db.statusMensagemDestinatarioTabela,
+          getReferencedColumn: (t) => t.idDestinatario,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$StatusMensagemDestinatarioTabelaTableAnnotationComposer(
+                $db: $db,
+                $table: $db.statusMensagemDestinatarioTabela,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$UsuarioTabelaTableTableManager
@@ -1536,7 +2237,11 @@ class $$UsuarioTabelaTableTableManager
           $$UsuarioTabelaTableUpdateCompanionBuilder,
           (UsuarioTabelaData, $$UsuarioTabelaTableReferences),
           UsuarioTabelaData,
-          PrefetchHooks Function({bool usuarioConversaTabelaRefs})
+          PrefetchHooks Function({
+            bool usuarioConversaTabelaRefs,
+            bool mensagemTabelaRefs,
+            bool statusMensagemDestinatarioTabelaRefs,
+          })
         > {
   $$UsuarioTabelaTableTableManager(_$AppDatabase db, $UsuarioTabelaTable table)
     : super(
@@ -1585,39 +2290,87 @@ class $$UsuarioTabelaTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({usuarioConversaTabelaRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (usuarioConversaTabelaRefs) db.usuarioConversaTabela,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (usuarioConversaTabelaRefs)
-                    await $_getPrefetchedDataByColumns<
-                      UsuarioTabelaData,
-                      $UsuarioTabelaTable,
-                      UsuarioConversaTabelaData,
-                      $UsuarioConversaTabelaTable
-                    >(
-                      currentTable: table,
-                      referencedTable: $$UsuarioTabelaTableReferences
-                          ._usuarioConversaTabelaRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$UsuarioTabelaTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).usuarioConversaTabelaRefs,
-                      currentColumn: 'id_usuario',
-                      referencedColumn: 'id_usuario',
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({
+                usuarioConversaTabelaRefs = false,
+                mensagemTabelaRefs = false,
+                statusMensagemDestinatarioTabelaRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (usuarioConversaTabelaRefs) db.usuarioConversaTabela,
+                    if (mensagemTabelaRefs) db.mensagemTabela,
+                    if (statusMensagemDestinatarioTabelaRefs)
+                      db.statusMensagemDestinatarioTabela,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (usuarioConversaTabelaRefs)
+                        await $_getPrefetchedDataByColumns<
+                          UsuarioTabelaData,
+                          $UsuarioTabelaTable,
+                          UsuarioConversaTabelaData,
+                          $UsuarioConversaTabelaTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsuarioTabelaTableReferences
+                              ._usuarioConversaTabelaRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsuarioTabelaTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).usuarioConversaTabelaRefs,
+                          currentColumn: 'id_usuario',
+                          referencedColumn: 'id_usuario',
+                          typedResults: items,
+                        ),
+                      if (mensagemTabelaRefs)
+                        await $_getPrefetchedDataByColumns<
+                          UsuarioTabelaData,
+                          $UsuarioTabelaTable,
+                          MensagemTabelaData,
+                          $MensagemTabelaTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsuarioTabelaTableReferences
+                              ._mensagemTabelaRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsuarioTabelaTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).mensagemTabelaRefs,
+                          currentColumn: 'id_usuario',
+                          referencedColumn: 'id_remetente',
+                          typedResults: items,
+                        ),
+                      if (statusMensagemDestinatarioTabelaRefs)
+                        await $_getPrefetchedDataByColumns<
+                          UsuarioTabelaData,
+                          $UsuarioTabelaTable,
+                          StatusMensagemDestinatarioTabelaData,
+                          $StatusMensagemDestinatarioTabelaTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsuarioTabelaTableReferences
+                              ._statusMensagemDestinatarioTabelaRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsuarioTabelaTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).statusMensagemDestinatarioTabelaRefs,
+                          currentColumn: 'id_usuario',
+                          referencedColumn: 'id_destinatario',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -1634,7 +2387,11 @@ typedef $$UsuarioTabelaTableProcessedTableManager =
       $$UsuarioTabelaTableUpdateCompanionBuilder,
       (UsuarioTabelaData, $$UsuarioTabelaTableReferences),
       UsuarioTabelaData,
-      PrefetchHooks Function({bool usuarioConversaTabelaRefs})
+      PrefetchHooks Function({
+        bool usuarioConversaTabelaRefs,
+        bool mensagemTabelaRefs,
+        bool statusMensagemDestinatarioTabelaRefs,
+      })
     >;
 typedef $$ConversaTabelaTableCreateCompanionBuilder =
     ConversaTabelaCompanion Function({
@@ -2435,18 +3192,22 @@ typedef $$UsuarioConversaTabelaTableProcessedTableManager =
 typedef $$MensagemTabelaTableCreateCompanionBuilder =
     MensagemTabelaCompanion Function({
       required String idMensagem,
+      required String idRemetente,
       required String idConversa,
       required String texto,
       required DateTime horarioEnvio,
+      required String statusMensagem,
       required bool sincronizado,
       Value<int> rowid,
     });
 typedef $$MensagemTabelaTableUpdateCompanionBuilder =
     MensagemTabelaCompanion Function({
       Value<String> idMensagem,
+      Value<String> idRemetente,
       Value<String> idConversa,
       Value<String> texto,
       Value<DateTime> horarioEnvio,
+      Value<String> statusMensagem,
       Value<bool> sincronizado,
       Value<int> rowid,
     });
@@ -2464,6 +3225,24 @@ final class $$MensagemTabelaTableReferences
     super.$_typedResult,
   );
 
+  static $UsuarioTabelaTable _idRemetenteTable(_$AppDatabase db) => db
+      .usuarioTabela
+      .createAlias('mensagem_tabela__id_remetente__usuario_tabela__id_usuario');
+
+  $$UsuarioTabelaTableProcessedTableManager get idRemetente {
+    final $_column = $_itemColumn<String>('id_remetente')!;
+
+    final manager = $$UsuarioTabelaTableTableManager(
+      $_db,
+      $_db.usuarioTabela,
+    ).filter((f) => f.idUsuario.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_idRemetenteTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
   static $ConversaTabelaTable _idConversaTable(_$AppDatabase db) =>
       db.conversaTabela.createAlias(
         'mensagem_tabela__id_conversa__conversa_tabela__id_conversa',
@@ -2480,6 +3259,38 @@ final class $$MensagemTabelaTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<
+    $StatusMensagemDestinatarioTabelaTable,
+    List<StatusMensagemDestinatarioTabelaData>
+  >
+  _statusMensagemDestinatarioTabelaRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.statusMensagemDestinatarioTabela,
+    aliasName:
+        'mensagem_tabela__id_mensagem__status_mensagem_destinatario_tabela__id_mensagem',
+  );
+
+  $$StatusMensagemDestinatarioTabelaTableProcessedTableManager
+  get statusMensagemDestinatarioTabelaRefs {
+    final manager =
+        $$StatusMensagemDestinatarioTabelaTableTableManager(
+          $_db,
+          $_db.statusMensagemDestinatarioTabela,
+        ).filter(
+          (f) => f.idMensagem.idMensagem.sqlEquals(
+            $_itemColumn<String>('id_mensagem')!,
+          ),
+        );
+
+    final cache = $_typedResult.readTableOrNull(
+      _statusMensagemDestinatarioTabelaRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -2508,10 +3319,38 @@ class $$MensagemTabelaTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get statusMensagem => $composableBuilder(
+    column: $table.statusMensagem,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<bool> get sincronizado => $composableBuilder(
     column: $table.sincronizado,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$UsuarioTabelaTableFilterComposer get idRemetente {
+    final $$UsuarioTabelaTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idRemetente,
+      referencedTable: $db.usuarioTabela,
+      getReferencedColumn: (t) => t.idUsuario,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsuarioTabelaTableFilterComposer(
+            $db: $db,
+            $table: $db.usuarioTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   $$ConversaTabelaTableFilterComposer get idConversa {
     final $$ConversaTabelaTableFilterComposer composer = $composerBuilder(
@@ -2534,6 +3373,35 @@ class $$MensagemTabelaTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> statusMensagemDestinatarioTabelaRefs(
+    Expression<bool> Function(
+      $$StatusMensagemDestinatarioTabelaTableFilterComposer f,
+    )
+    f,
+  ) {
+    final $$StatusMensagemDestinatarioTabelaTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.idMensagem,
+          referencedTable: $db.statusMensagemDestinatarioTabela,
+          getReferencedColumn: (t) => t.idMensagem,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$StatusMensagemDestinatarioTabelaTableFilterComposer(
+                $db: $db,
+                $table: $db.statusMensagemDestinatarioTabela,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
   }
 }
 
@@ -2561,10 +3429,38 @@ class $$MensagemTabelaTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get statusMensagem => $composableBuilder(
+    column: $table.statusMensagem,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get sincronizado => $composableBuilder(
     column: $table.sincronizado,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$UsuarioTabelaTableOrderingComposer get idRemetente {
+    final $$UsuarioTabelaTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idRemetente,
+      referencedTable: $db.usuarioTabela,
+      getReferencedColumn: (t) => t.idUsuario,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsuarioTabelaTableOrderingComposer(
+            $db: $db,
+            $table: $db.usuarioTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   $$ConversaTabelaTableOrderingComposer get idConversa {
     final $$ConversaTabelaTableOrderingComposer composer = $composerBuilder(
@@ -2612,10 +3508,38 @@ class $$MensagemTabelaTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get statusMensagem => $composableBuilder(
+    column: $table.statusMensagem,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get sincronizado => $composableBuilder(
     column: $table.sincronizado,
     builder: (column) => column,
   );
+
+  $$UsuarioTabelaTableAnnotationComposer get idRemetente {
+    final $$UsuarioTabelaTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idRemetente,
+      referencedTable: $db.usuarioTabela,
+      getReferencedColumn: (t) => t.idUsuario,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsuarioTabelaTableAnnotationComposer(
+            $db: $db,
+            $table: $db.usuarioTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   $$ConversaTabelaTableAnnotationComposer get idConversa {
     final $$ConversaTabelaTableAnnotationComposer composer = $composerBuilder(
@@ -2639,6 +3563,35 @@ class $$MensagemTabelaTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> statusMensagemDestinatarioTabelaRefs<T extends Object>(
+    Expression<T> Function(
+      $$StatusMensagemDestinatarioTabelaTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$StatusMensagemDestinatarioTabelaTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.idMensagem,
+          referencedTable: $db.statusMensagemDestinatarioTabela,
+          getReferencedColumn: (t) => t.idMensagem,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$StatusMensagemDestinatarioTabelaTableAnnotationComposer(
+                $db: $db,
+                $table: $db.statusMensagemDestinatarioTabela,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$MensagemTabelaTableTableManager
@@ -2654,7 +3607,11 @@ class $$MensagemTabelaTableTableManager
           $$MensagemTabelaTableUpdateCompanionBuilder,
           (MensagemTabelaData, $$MensagemTabelaTableReferences),
           MensagemTabelaData,
-          PrefetchHooks Function({bool idConversa})
+          PrefetchHooks Function({
+            bool idRemetente,
+            bool idConversa,
+            bool statusMensagemDestinatarioTabelaRefs,
+          })
         > {
   $$MensagemTabelaTableTableManager(
     _$AppDatabase db,
@@ -2672,32 +3629,40 @@ class $$MensagemTabelaTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> idMensagem = const Value.absent(),
+                Value<String> idRemetente = const Value.absent(),
                 Value<String> idConversa = const Value.absent(),
                 Value<String> texto = const Value.absent(),
                 Value<DateTime> horarioEnvio = const Value.absent(),
+                Value<String> statusMensagem = const Value.absent(),
                 Value<bool> sincronizado = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MensagemTabelaCompanion(
                 idMensagem: idMensagem,
+                idRemetente: idRemetente,
                 idConversa: idConversa,
                 texto: texto,
                 horarioEnvio: horarioEnvio,
+                statusMensagem: statusMensagem,
                 sincronizado: sincronizado,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required String idMensagem,
+                required String idRemetente,
                 required String idConversa,
                 required String texto,
                 required DateTime horarioEnvio,
+                required String statusMensagem,
                 required bool sincronizado,
                 Value<int> rowid = const Value.absent(),
               }) => MensagemTabelaCompanion.insert(
                 idMensagem: idMensagem,
+                idRemetente: idRemetente,
                 idConversa: idConversa,
                 texto: texto,
                 horarioEnvio: horarioEnvio,
+                statusMensagem: statusMensagem,
                 sincronizado: sincronizado,
                 rowid: rowid,
               ),
@@ -2709,7 +3674,489 @@ class $$MensagemTabelaTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({idConversa = false}) {
+          prefetchHooksCallback:
+              ({
+                idRemetente = false,
+                idConversa = false,
+                statusMensagemDestinatarioTabelaRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (statusMensagemDestinatarioTabelaRefs)
+                      db.statusMensagemDestinatarioTabela,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (idRemetente) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.idRemetente,
+                                    referencedTable:
+                                        $$MensagemTabelaTableReferences
+                                            ._idRemetenteTable(db),
+                                    referencedColumn:
+                                        $$MensagemTabelaTableReferences
+                                            ._idRemetenteTable(db)
+                                            .idUsuario,
+                                  )
+                                  as T;
+                        }
+                        if (idConversa) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.idConversa,
+                                    referencedTable:
+                                        $$MensagemTabelaTableReferences
+                                            ._idConversaTable(db),
+                                    referencedColumn:
+                                        $$MensagemTabelaTableReferences
+                                            ._idConversaTable(db)
+                                            .idConversa,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (statusMensagemDestinatarioTabelaRefs)
+                        await $_getPrefetchedDataByColumns<
+                          MensagemTabelaData,
+                          $MensagemTabelaTable,
+                          StatusMensagemDestinatarioTabelaData,
+                          $StatusMensagemDestinatarioTabelaTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MensagemTabelaTableReferences
+                              ._statusMensagemDestinatarioTabelaRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MensagemTabelaTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).statusMensagemDestinatarioTabelaRefs,
+                          currentColumn: 'id_mensagem',
+                          referencedColumn: 'id_mensagem',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$MensagemTabelaTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MensagemTabelaTable,
+      MensagemTabelaData,
+      $$MensagemTabelaTableFilterComposer,
+      $$MensagemTabelaTableOrderingComposer,
+      $$MensagemTabelaTableAnnotationComposer,
+      $$MensagemTabelaTableCreateCompanionBuilder,
+      $$MensagemTabelaTableUpdateCompanionBuilder,
+      (MensagemTabelaData, $$MensagemTabelaTableReferences),
+      MensagemTabelaData,
+      PrefetchHooks Function({
+        bool idRemetente,
+        bool idConversa,
+        bool statusMensagemDestinatarioTabelaRefs,
+      })
+    >;
+typedef $$StatusMensagemDestinatarioTabelaTableCreateCompanionBuilder =
+    StatusMensagemDestinatarioTabelaCompanion Function({
+      required String idDestinatario,
+      required String idMensagem,
+      Value<DateTime?> horarioRecebimento,
+      Value<DateTime?> horarioLido,
+      required bool sincronizado,
+      Value<int> rowid,
+    });
+typedef $$StatusMensagemDestinatarioTabelaTableUpdateCompanionBuilder =
+    StatusMensagemDestinatarioTabelaCompanion Function({
+      Value<String> idDestinatario,
+      Value<String> idMensagem,
+      Value<DateTime?> horarioRecebimento,
+      Value<DateTime?> horarioLido,
+      Value<bool> sincronizado,
+      Value<int> rowid,
+    });
+
+final class $$StatusMensagemDestinatarioTabelaTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $StatusMensagemDestinatarioTabelaTable,
+          StatusMensagemDestinatarioTabelaData
+        > {
+  $$StatusMensagemDestinatarioTabelaTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $UsuarioTabelaTable _idDestinatarioTable(
+    _$AppDatabase db,
+  ) => db.usuarioTabela.createAlias(
+    'status_mensagem_destinatario_tabela__id_destinatario__usuario_tabela__id_usuario',
+  );
+
+  $$UsuarioTabelaTableProcessedTableManager get idDestinatario {
+    final $_column = $_itemColumn<String>('id_destinatario')!;
+
+    final manager = $$UsuarioTabelaTableTableManager(
+      $_db,
+      $_db.usuarioTabela,
+    ).filter((f) => f.idUsuario.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_idDestinatarioTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MensagemTabelaTable _idMensagemTable(
+    _$AppDatabase db,
+  ) => db.mensagemTabela.createAlias(
+    'status_mensagem_destinatario_tabela__id_mensagem__mensagem_tabela__id_mensagem',
+  );
+
+  $$MensagemTabelaTableProcessedTableManager get idMensagem {
+    final $_column = $_itemColumn<String>('id_mensagem')!;
+
+    final manager = $$MensagemTabelaTableTableManager(
+      $_db,
+      $_db.mensagemTabela,
+    ).filter((f) => f.idMensagem.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_idMensagemTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$StatusMensagemDestinatarioTabelaTableFilterComposer
+    extends Composer<_$AppDatabase, $StatusMensagemDestinatarioTabelaTable> {
+  $$StatusMensagemDestinatarioTabelaTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<DateTime> get horarioRecebimento => $composableBuilder(
+    column: $table.horarioRecebimento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get horarioLido => $composableBuilder(
+    column: $table.horarioLido,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+    column: $table.sincronizado,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UsuarioTabelaTableFilterComposer get idDestinatario {
+    final $$UsuarioTabelaTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idDestinatario,
+      referencedTable: $db.usuarioTabela,
+      getReferencedColumn: (t) => t.idUsuario,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsuarioTabelaTableFilterComposer(
+            $db: $db,
+            $table: $db.usuarioTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MensagemTabelaTableFilterComposer get idMensagem {
+    final $$MensagemTabelaTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idMensagem,
+      referencedTable: $db.mensagemTabela,
+      getReferencedColumn: (t) => t.idMensagem,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MensagemTabelaTableFilterComposer(
+            $db: $db,
+            $table: $db.mensagemTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$StatusMensagemDestinatarioTabelaTableOrderingComposer
+    extends Composer<_$AppDatabase, $StatusMensagemDestinatarioTabelaTable> {
+  $$StatusMensagemDestinatarioTabelaTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<DateTime> get horarioRecebimento => $composableBuilder(
+    column: $table.horarioRecebimento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get horarioLido => $composableBuilder(
+    column: $table.horarioLido,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+    column: $table.sincronizado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UsuarioTabelaTableOrderingComposer get idDestinatario {
+    final $$UsuarioTabelaTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idDestinatario,
+      referencedTable: $db.usuarioTabela,
+      getReferencedColumn: (t) => t.idUsuario,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsuarioTabelaTableOrderingComposer(
+            $db: $db,
+            $table: $db.usuarioTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MensagemTabelaTableOrderingComposer get idMensagem {
+    final $$MensagemTabelaTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idMensagem,
+      referencedTable: $db.mensagemTabela,
+      getReferencedColumn: (t) => t.idMensagem,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MensagemTabelaTableOrderingComposer(
+            $db: $db,
+            $table: $db.mensagemTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$StatusMensagemDestinatarioTabelaTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StatusMensagemDestinatarioTabelaTable> {
+  $$StatusMensagemDestinatarioTabelaTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<DateTime> get horarioRecebimento => $composableBuilder(
+    column: $table.horarioRecebimento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get horarioLido => $composableBuilder(
+    column: $table.horarioLido,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+    column: $table.sincronizado,
+    builder: (column) => column,
+  );
+
+  $$UsuarioTabelaTableAnnotationComposer get idDestinatario {
+    final $$UsuarioTabelaTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idDestinatario,
+      referencedTable: $db.usuarioTabela,
+      getReferencedColumn: (t) => t.idUsuario,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsuarioTabelaTableAnnotationComposer(
+            $db: $db,
+            $table: $db.usuarioTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$MensagemTabelaTableAnnotationComposer get idMensagem {
+    final $$MensagemTabelaTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idMensagem,
+      referencedTable: $db.mensagemTabela,
+      getReferencedColumn: (t) => t.idMensagem,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MensagemTabelaTableAnnotationComposer(
+            $db: $db,
+            $table: $db.mensagemTabela,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$StatusMensagemDestinatarioTabelaTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StatusMensagemDestinatarioTabelaTable,
+          StatusMensagemDestinatarioTabelaData,
+          $$StatusMensagemDestinatarioTabelaTableFilterComposer,
+          $$StatusMensagemDestinatarioTabelaTableOrderingComposer,
+          $$StatusMensagemDestinatarioTabelaTableAnnotationComposer,
+          $$StatusMensagemDestinatarioTabelaTableCreateCompanionBuilder,
+          $$StatusMensagemDestinatarioTabelaTableUpdateCompanionBuilder,
+          (
+            StatusMensagemDestinatarioTabelaData,
+            $$StatusMensagemDestinatarioTabelaTableReferences,
+          ),
+          StatusMensagemDestinatarioTabelaData,
+          PrefetchHooks Function({bool idDestinatario, bool idMensagem})
+        > {
+  $$StatusMensagemDestinatarioTabelaTableTableManager(
+    _$AppDatabase db,
+    $StatusMensagemDestinatarioTabelaTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StatusMensagemDestinatarioTabelaTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$StatusMensagemDestinatarioTabelaTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$StatusMensagemDestinatarioTabelaTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> idDestinatario = const Value.absent(),
+                Value<String> idMensagem = const Value.absent(),
+                Value<DateTime?> horarioRecebimento = const Value.absent(),
+                Value<DateTime?> horarioLido = const Value.absent(),
+                Value<bool> sincronizado = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StatusMensagemDestinatarioTabelaCompanion(
+                idDestinatario: idDestinatario,
+                idMensagem: idMensagem,
+                horarioRecebimento: horarioRecebimento,
+                horarioLido: horarioLido,
+                sincronizado: sincronizado,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String idDestinatario,
+                required String idMensagem,
+                Value<DateTime?> horarioRecebimento = const Value.absent(),
+                Value<DateTime?> horarioLido = const Value.absent(),
+                required bool sincronizado,
+                Value<int> rowid = const Value.absent(),
+              }) => StatusMensagemDestinatarioTabelaCompanion.insert(
+                idDestinatario: idDestinatario,
+                idMensagem: idMensagem,
+                horarioRecebimento: horarioRecebimento,
+                horarioLido: horarioLido,
+                sincronizado: sincronizado,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $StatusMensagemDestinatarioTabelaTable,
+                    StatusMensagemDestinatarioTabelaData
+                  >(table),
+                  $$StatusMensagemDestinatarioTabelaTableReferences(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({idDestinatario = false, idMensagem = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -2729,17 +4176,33 @@ class $$MensagemTabelaTableTableManager
                       dynamic
                     >
                   >(state) {
-                    if (idConversa) {
+                    if (idDestinatario) {
                       state =
                           state.withJoin(
                                 currentTable: table,
-                                currentColumn: table.idConversa,
-                                referencedTable: $$MensagemTabelaTableReferences
-                                    ._idConversaTable(db),
+                                currentColumn: table.idDestinatario,
+                                referencedTable:
+                                    $$StatusMensagemDestinatarioTabelaTableReferences
+                                        ._idDestinatarioTable(db),
                                 referencedColumn:
-                                    $$MensagemTabelaTableReferences
-                                        ._idConversaTable(db)
-                                        .idConversa,
+                                    $$StatusMensagemDestinatarioTabelaTableReferences
+                                        ._idDestinatarioTable(db)
+                                        .idUsuario,
+                              )
+                              as T;
+                    }
+                    if (idMensagem) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.idMensagem,
+                                referencedTable:
+                                    $$StatusMensagemDestinatarioTabelaTableReferences
+                                        ._idMensagemTable(db),
+                                referencedColumn:
+                                    $$StatusMensagemDestinatarioTabelaTableReferences
+                                        ._idMensagemTable(db)
+                                        .idMensagem,
                               )
                               as T;
                     }
@@ -2755,19 +4218,22 @@ class $$MensagemTabelaTableTableManager
       );
 }
 
-typedef $$MensagemTabelaTableProcessedTableManager =
+typedef $$StatusMensagemDestinatarioTabelaTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $MensagemTabelaTable,
-      MensagemTabelaData,
-      $$MensagemTabelaTableFilterComposer,
-      $$MensagemTabelaTableOrderingComposer,
-      $$MensagemTabelaTableAnnotationComposer,
-      $$MensagemTabelaTableCreateCompanionBuilder,
-      $$MensagemTabelaTableUpdateCompanionBuilder,
-      (MensagemTabelaData, $$MensagemTabelaTableReferences),
-      MensagemTabelaData,
-      PrefetchHooks Function({bool idConversa})
+      $StatusMensagemDestinatarioTabelaTable,
+      StatusMensagemDestinatarioTabelaData,
+      $$StatusMensagemDestinatarioTabelaTableFilterComposer,
+      $$StatusMensagemDestinatarioTabelaTableOrderingComposer,
+      $$StatusMensagemDestinatarioTabelaTableAnnotationComposer,
+      $$StatusMensagemDestinatarioTabelaTableCreateCompanionBuilder,
+      $$StatusMensagemDestinatarioTabelaTableUpdateCompanionBuilder,
+      (
+        StatusMensagemDestinatarioTabelaData,
+        $$StatusMensagemDestinatarioTabelaTableReferences,
+      ),
+      StatusMensagemDestinatarioTabelaData,
+      PrefetchHooks Function({bool idDestinatario, bool idMensagem})
     >;
 
 class $AppDatabaseManager {
@@ -2781,4 +4247,10 @@ class $AppDatabaseManager {
       $$UsuarioConversaTabelaTableTableManager(_db, _db.usuarioConversaTabela);
   $$MensagemTabelaTableTableManager get mensagemTabela =>
       $$MensagemTabelaTableTableManager(_db, _db.mensagemTabela);
+  $$StatusMensagemDestinatarioTabelaTableTableManager
+  get statusMensagemDestinatarioTabela =>
+      $$StatusMensagemDestinatarioTabelaTableTableManager(
+        _db,
+        _db.statusMensagemDestinatarioTabela,
+      );
 }

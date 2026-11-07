@@ -25,13 +25,26 @@ class UsuarioConversaTabela extends Table {
 
 class MensagemTabela extends Table {
   TextColumn get idMensagem => text()();
+  TextColumn get idRemetente => text().references(UsuarioTabela, #idUsuario)();
   TextColumn get idConversa => text().references(ConversaTabela, #idConversa)();
   TextColumn get texto => text()();
   DateTimeColumn get horarioEnvio => dateTime()();
+  TextColumn get statusMensagem => text()();
   BoolColumn get sincronizado => boolean()();
 
   @override
   Set<Column> get primaryKey => {idMensagem};
+}
+
+class StatusMensagemDestinatarioTabela extends Table {
+  TextColumn get idDestinatario => text().references(UsuarioTabela, #idUsuario)();
+  TextColumn get idMensagem => text().references(MensagemTabela, #idMensagem)();
+  DateTimeColumn get horarioRecebimento => dateTime().nullable()();
+  DateTimeColumn get horarioLido => dateTime().nullable()();
+  BoolColumn get sincronizado => boolean()();
+
+  @override
+  Set<Column> get primaryKey => {idMensagem, idDestinatario};
 }
 
 class ConversaTabela extends Table {
@@ -49,6 +62,7 @@ class ConversaTabela extends Table {
     UsuarioConversaTabela,
     ConversaTabela,
     MensagemTabela,
+    StatusMensagemDestinatarioTabela,
   ],
 )
 class AppDatabase extends _$AppDatabase {

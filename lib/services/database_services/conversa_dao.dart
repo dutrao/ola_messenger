@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart';
 import 'package:ola_messenger/database/database.dart';
 import 'package:ola_messenger/model/conversa.dart';
 

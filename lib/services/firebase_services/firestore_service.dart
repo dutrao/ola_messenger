@@ -37,4 +37,43 @@ class FirestoreService {
     }
     return listaTodasMensagens;
   }
+
+  Future<List<Mensagem>> buscarTodasMensagensNuvemPorConversa(
+    String idConversa,
+  ) async {
+    List<Mensagem> listaTodasMensagens = [];
+    final resultados = await firestore
+        .collection('mensagens')
+        .where("idConversa", isEqualTo: idConversa)
+        .get();
+    for (final resultado in resultados.docs) {
+      listaTodasMensagens.add(Mensagem.fromMap(resultado.data()));
+    }
+    return listaTodasMensagens;
+  }
+
+  Future<List<Mensagem>> buscar100MensagensNuvemPorConversa(
+    String idConversa,
+  ) async {
+    List<Mensagem> listaTodasMensagens = [];
+    final resultados = await firestore
+        .collection('mensagens')
+        .where("idConversa", isEqualTo: idConversa)
+        .limit(100)
+        .orderBy('horarioEnvio', descending: true)
+        .get();
+    for (final resultado in resultados.docs) {
+      listaTodasMensagens.add(Mensagem.fromMap(resultado.data()));
+    }
+    return listaTodasMensagens.reversed.toList();
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> abrirStreamMensagensPorIdConversa(
+    String idConversa,
+  ) {
+    return firestore
+        .collection('mensagens')
+        .where('idConversa', isEqualTo: idConversa)       
+        .snapshots();
+  }
 }

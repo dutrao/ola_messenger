@@ -6,36 +6,34 @@ import 'package:provider/provider.dart';
 
 class MensagemTile extends StatefulWidget {
   final Mensagem mensagem;
-  
-  const MensagemTile({
-    super.key,
-    required this.mensagem,
-    
-  });
+
+  const MensagemTile({super.key, required this.mensagem});
 
   @override
   State<MensagemTile> createState() => _MensagemTileState();
 }
 
 class _MensagemTileState extends State<MensagemTile> {
-  
   @override
   Widget build(BuildContext context) {
     final idUsuario = context.read<Storage>().pegarUsuario()!.uid;
     return Container(
-      color: idUsuario == widget.mensagem.idRemetente ? Colors.green : Colors.white,
+      color: idUsuario == widget.mensagem.idRemetente
+          ? Colors.green
+          : Colors.white,
       child: Column(
-        children: [          
+        children: [
           Text(widget.mensagem.texto),
-          Row(
-            children: [
-              iconStatus(),
-              Text(widget.mensagem.horarioEnvio.toString()),
-            ],
-          ),
+          Row(children: [iconStatus(), Text(horarioEnvio)]),
         ],
       ),
     );
+  }
+
+  String get horarioEnvio {
+    final horario = widget.mensagem.horarioEnvio;
+
+    return '${horario.hour.toString().padLeft(2, '0')}:${horario.minute.toString().padLeft(2, '0')}';
   }
 
   Icon iconStatus() {
