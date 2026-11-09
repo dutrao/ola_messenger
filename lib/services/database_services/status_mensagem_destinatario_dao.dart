@@ -2,11 +2,25 @@ import 'package:drift/drift.dart';
 import 'package:ola_messenger/database/database.dart';
 import 'package:ola_messenger/model/status_mensagem_destinatario.dart';
 
-class MensagemDestinatarioDao {
+class StatusMensagemDestinatarioDao {
   AppDatabase database;
-  MensagemDestinatarioDao({required this.database});
+  StatusMensagemDestinatarioDao({required this.database});
 
   Future<void> adicionarMensagemDestinaraioLocal(
+    StatusMensagemDestinatario mensagemDestinatario,
+  ) async {
+    await database
+        .into(database.statusMensagemDestinatarioTabela)
+        .insert(
+          StatusMensagemDestinatarioTabelaCompanion.insert(
+            idDestinatario: mensagemDestinatario.idDestinatario,
+            idMensagem: mensagemDestinatario.idMensagem,
+            sincronizado: mensagemDestinatario.sincronizado,
+          ),
+        );
+  }
+
+   Future<void> adicionarOuAtualizarStatusMensagemDestinatarioLocal(
     StatusMensagemDestinatario mensagemDestinatario,
   ) async {
     await database
@@ -20,7 +34,19 @@ class MensagemDestinatarioDao {
         );
   }
 
-  Future<void> adicionarListaMensagemDestinaraioLocal(
+    Future<void> removerStatusMensagemDestinatarioLocal(
+    StatusMensagemDestinatario mensagemDestinatario,
+  ) async {
+    await (database.delete(
+      database.statusMensagemDestinatarioTabela,
+      
+    )..where((tbl) =>
+            tbl.idDestinatario.equals(mensagemDestinatario.idDestinatario) &
+            tbl.idMensagem.equals(mensagemDestinatario.idMensagem))).go()
+        ;
+  }
+
+  Future<void> adicionarListaStatusMensagemDestinaraioLocal(
     List<StatusMensagemDestinatario> listaMensagemDestinatario,
   ) async {
     await database.batch((batch) {
@@ -38,7 +64,7 @@ class MensagemDestinatarioDao {
   }
 
   Future<List<StatusMensagemDestinatario>>
-  buscarListaTodosMensagemDestinatarioLocal() async {
+  buscarListaTodosStatusMensagemDestinatarioLocal() async {
     List<StatusMensagemDestinatario> listaMensagemDestinatario = [];
     final resultados = await database
         .select(database.statusMensagemDestinatarioTabela)

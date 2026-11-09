@@ -13,6 +13,20 @@ class UsuarioConversaDao {
   ) async {
     await database
         .into(database.usuarioConversaTabela)
+        .insert(
+          UsuarioConversaTabelaCompanion.insert(
+            idUsuario: usuarioConversa.idUsuario,
+            idConversa: usuarioConversa.idConversa,
+            sincronizado: usuarioConversa.sincronizado,
+          ),
+        );
+  }
+
+  Future<void> adicionarOuAtualizarUsuarioConversaLocal(
+    UsuarioConversa usuarioConversa,
+  ) async {
+    await database
+        .into(database.usuarioConversaTabela)
         .insertOnConflictUpdate(
           UsuarioConversaTabelaCompanion.insert(
             idUsuario: usuarioConversa.idUsuario,
@@ -20,6 +34,17 @@ class UsuarioConversaDao {
             sincronizado: usuarioConversa.sincronizado,
           ),
         );
+  }
+
+  Future<void> removerUsuarioConversaLocal(
+    UsuarioConversa usuarioConversa,
+  ) async {
+    await (database.delete(database.usuarioConversaTabela)..where(
+          (tbl) =>
+              tbl.idUsuario.equals(usuarioConversa.idUsuario) &
+              tbl.idConversa.equals(usuarioConversa.idConversa),
+        ))
+        .go();
   }
 
   Future<void> adicionarListaUsuarioConversaLocal(
@@ -51,6 +76,20 @@ class UsuarioConversaDao {
         sincronizado: resultado.sincronizado,
       );
     }).toList();
+  }
+
+  Future<List<String>> buscarListaConversasPorUsuarioLocal(
+    String idUsuario,
+  ) async {
+    List<String> listaIdConversas = [];
+
+    final resultados = await (database.select(
+      database.usuarioConversaTabela,
+    )..where((tbl) => tbl.idUsuario.equals(idUsuario))).get();
+    for (final resultado in resultados) {
+      listaIdConversas.add(resultado.idConversa);
+    }
+    return listaIdConversas;
   }
 
   Future<Conversa?> pegarConversaEntreDoisUsuariosLocal(

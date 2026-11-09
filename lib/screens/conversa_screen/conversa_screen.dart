@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:ola_messenger/model/conversa.dart';
 import 'package:ola_messenger/model/mensagem.dart';
 import 'package:ola_messenger/model/status_mensagem.dart';
+import 'package:ola_messenger/model/status_mensagem_destinatario.dart';
 import 'package:ola_messenger/model/usuario.dart';
 import 'package:ola_messenger/model/usuario_conversa.dart';
 import 'package:ola_messenger/screens/conversa_screen/mensagem_tile.dart';
@@ -64,8 +65,8 @@ class _ConversaScreenState extends State<ConversaScreen> {
 
         print('resultado idConversa: $idConversa');
 
-        streamMensagensNuvem = storage.abrirStreamMensagensPorIdConversa(
-          idConversa!,
+        streamMensagensNuvem = storage.abrirStreamMensagensPorListaIdConversa(
+          [idConversa!],
         );
 
         subscriptionMensagensNuvem = streamMensagensNuvem!.listen((
@@ -76,22 +77,25 @@ class _ConversaScreenState extends State<ConversaScreen> {
             final dado = documento.doc.data();
             switch (documento.type) {
               case DocumentChangeType.added:
-                if (dado == null || dado['idRemetente'] == idRemetente)
+                if (dado == null || dado['idRemetente'] == idRemetente) {
                   continue;
-                await storage.adicionarOuAtualizarMensagemNuvemParaLocal(
+                }
+                await storage.adicionarOuAtualizarMensagemLocal(
                   Mensagem.fromMap(dado),
                 );
                 break;
               case DocumentChangeType.modified:
-                if (dado == null || dado['idRemetente'] == idRemetente)
+                if (dado == null || dado['idRemetente'] == idRemetente) {
                   continue;
-                await storage.adicionarOuAtualizarMensagemNuvemParaLocal(
+                }
+                await storage.adicionarOuAtualizarMensagemLocal(
                   Mensagem.fromMap(dado),
                 );
                 break;
               case DocumentChangeType.removed:
-                if (dado == null || dado['idRemetente'] == idRemetente)
+                if (dado == null || dado['idRemetente'] == idRemetente) {
                   continue;
+                }
                 await storage.removerMensagemLocal(Mensagem.fromMap(dado));
                 break;
             }
@@ -191,8 +195,28 @@ class _ConversaScreenState extends State<ConversaScreen> {
 
       await storage.adicionarMensagemNuvem(mensagem);
 
+      await storage.adicionarConversaNuvem(
+        Conversa(isGrupo: false, idConversa: idConversa!, sincronizado: true),
+      );
+      await storage.adicionarUsuarioConversaNuvem(
+        UsuarioConversa(
+          idUsuario: storage.pegarUsuario()!.uid,
+          idConversa: idConversa!,
+          sincronizado: true,
+        ),
+      );
+      await storage.adicionarStatusMensagemDestinatarioNuvem(
+        StatusMensagemDestinatario(
+          idMensagem: mensagem.idMensagem,
+          idDestinatario: widget.destinatario.idUsuario,
+          horarioRecebimento: null,
+          horarioLido: null,
+          sincronizado: true,
+        ),
+      );
+
       mensagem.statusMensagem = StatusMensagem.enviada;
-      await storage.adicionarOuAtualizarMensagemNuvemParaLocal(mensagem);
+      await storage.adicionarOuAtualizarMensagemLocal(mensagem);
     } catch (e) {
       mensagem.sincronizado = false;
       print('erro ao enviar mensagem para a nuvem: $e');

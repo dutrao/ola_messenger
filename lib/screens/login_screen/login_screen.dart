@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ola_messenger/screens/cadastro_screen/cadastro_screen.dart';
-import 'package:ola_messenger/screens/home_screen/home_screen.dart';
+import 'package:ola_messenger/screens/main_screen/main_screen.dart';
 import 'package:ola_messenger/storage/storage.dart';
 import 'package:provider/provider.dart';
 
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) => MainScreen()),
       );
     } on FirebaseAuthException catch (e) {
       print(e);

@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:ola_messenger/screens/home_screen/home_screen.dart';
+import 'package:ola_messenger/screens/main_screen/main_screen.dart';
 import 'package:ola_messenger/screens/login_screen/login_screen.dart';
 import 'package:ola_messenger/storage/storage.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +25,7 @@ class _RoteadorScreenState extends State<RoteadorScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return usuario == null ? LoginScreen() : HomeScreen();
+    return usuario == null ? LoginScreen() : MainScreen();
   }
 
  void pegarUsuario(){

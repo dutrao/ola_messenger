@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:ola_messenger/database/database.dart';
 import 'package:ola_messenger/model/conversa.dart';
 
@@ -35,6 +36,24 @@ class ConversaDao {
     });
   }
 
+  Future<void> adicionarOuAtualizarConversaLocal(Conversa conversa) async {
+    await database
+        .into(database.conversaTabela)
+        .insertOnConflictUpdate(
+          ConversaTabelaCompanion.insert(
+            idConversa: conversa.idConversa,
+            isGrupo: conversa.isGrupo,
+            sincronizado: conversa.sincronizado,
+          ),
+        );
+  }
+
+  Future<void> removerConversaLocal(Conversa conversa) async {
+    await (database.delete(
+      database.conversaTabela,
+    )..where((tbl) => tbl.idConversa.equals(conversa.idConversa))).go();
+  }
+
   Future<List<Conversa>> pegarConversasLocal() async {
     List<Conversa> listaConversas = [];
     final resultados = await database.select(database.conversaTabela).get();
@@ -50,5 +69,14 @@ class ConversaDao {
     return listaConversas;
   }
 
-
+  Future<Conversa> buscarConversaPorIdLocal() async {
+    final resultado = await database
+        .select(database.conversaTabela)
+        .getSingle();
+    return Conversa(
+      idConversa: resultado.idConversa,
+      isGrupo: resultado.isGrupo,
+      sincronizado: resultado.sincronizado,
+    );
+  }
 }
