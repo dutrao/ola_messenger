@@ -138,7 +138,7 @@ class FirestoreService {
 
   Stream<QuerySnapshot<Map<String, dynamic>>> abrirStreamConversaNuvem(
     List<String> listaIdConversa,    
-  )  { 
+  )  {
     return firestore
         .collection('conversas')
         .where('idConversa', whereIn: listaIdConversa)

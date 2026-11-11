@@ -21,6 +21,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late final Storage storage;
+  late final Storage  storageEstado;
   StreamSubscription? subscriptionConversaNuvem;
   StreamSubscription? subscriptionMensagemNuvem;
   StreamSubscription? subscriptionUsuarioConversaNuvem;
@@ -29,34 +30,16 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    storageEstado = context.watch<Storage>();
     storage = context.read<Storage>();
     Future.microtask(() async {
-      List<String> listaIdConversas = await storage
-          .buscarListaIdConversasUsuarioNuvem(storage.pegarUsuario()!.uid);
-      List<String> listaIdMensagens = await storage
-          .buscarListaIdMensagensUsuarioNuvem(listaIdConversas);
       await storage.sincronizarUsuarioNuvemParaLocal();
       await storage.atualizarListaTodosUsuarios();
-      subscriptionConversaNuvem = storage
-          .abrirStreamConversaNuvem(listaIdConversas)
-          .listen((event) {
-            event.docChanges.forEach((change) async {
-              if (change.type == DocumentChangeType.added)  {
-                final conversa = Conversa.fromMap(change.doc.data()!);
-                await storage.adicionarConversaLocal(conversa);
-              } else if (change.type == DocumentChangeType.modified) {
-                final conversa = Conversa.fromMap(change.doc.data()!);
-                await storage.adicionarOuAtualizarConversaLocal(conversa);
-              } else if (change.type == DocumentChangeType.removed) {
-                final conversa = Conversa.fromMap(change.doc.data()!);
-                storage.removerConversaLocal(conversa);
-              }
-            });
-          });
       subscriptionUsuarioConversaNuvem = storage
           .abrirStreamUsuarioConversaNuvem(storage.pegarUsuario()!.uid)
-          .listen((event) {
-            event.docChanges.forEach((change) async {
+          .listen((event) async {
+            storageEstado.listaIdConversasUsuarioNuvem = event.docs.map((e) => e.data()['idConversa'].toString(),).toList();
+            for (final change in event.docChanges) {
               if (change.type == DocumentChangeType.added) {
                 final usuarioConversa = UsuarioConversa.fromMap(
                   change.doc.data()!,
@@ -75,12 +58,30 @@ class _MainScreenState extends State<MainScreen> {
                 );
                 await storage.removerUsuarioConversaLocal(usuarioConversa);
               }
-            });
+            }
           });
+      subscriptionConversaNuvem = storage
+          .abrirStreamConversaNuvem(storageEstado.listaIdConversasUsuarioNuvem)
+          .listen((event) async {            
+            for (final change in event.docChanges) {
+              if (change.type == DocumentChangeType.added) {
+                final conversa = Conversa.fromMap(change.doc.data()!);
+                await storage.adicionarConversaLocal(conversa);
+              } else if (change.type == DocumentChangeType.modified) {
+                final conversa = Conversa.fromMap(change.doc.data()!);
+                await storage.adicionarOuAtualizarConversaLocal(conversa);
+              } else if (change.type == DocumentChangeType.removed) {
+                final conversa = Conversa.fromMap(change.doc.data()!);
+                await storage.removerConversaLocal(conversa);
+              }
+            }
+          });
+
       subscriptionMensagemNuvem = storage
-          .abrirStreamMensagensPorListaIdConversa(listaIdConversas)
-          .listen((event) {
-            event.docChanges.forEach((change) async {
+          .abrirStreamMensagensPorListaIdConversa(storageEstado.listaIdConversasUsuarioNuvem)
+          .listen((event) async {
+            storageEstado.listaIdMensagensUsuarioNuvem = event.docs.map((e) => e.data()['idMensagem'].toString(),).toList();
+            for (final change in event.docChanges) {
               if (change.type == DocumentChangeType.added) {
                 final mensagem = Mensagem.fromMap(change.doc.data()!);
                 await storage.adicionarMensagemLocal(mensagem);
@@ -91,32 +92,37 @@ class _MainScreenState extends State<MainScreen> {
                 final mensagem = Mensagem.fromMap(change.doc.data()!);
                 await storage.removerMensagemLocal(mensagem);
               }
-            });
+            }
           });
+
       subscriptionStatusMensagemDestinatarioNuvem = storage
           .abrirStreamStatusMensagemDestinatarioNuvem(listaIdMensagens)
-          .listen((event) {
-            event.docChanges.forEach((change) async {
+          .listen((event) async {
+            for (final change in event.docChanges) {
               if (change.type == DocumentChangeType.added) {
                 final statusMensagemDestinatario =
                     StatusMensagemDestinatario.fromMap(change.doc.data()!);
+
                 await storage.adicionarStatusMensagemDestinatarioLocal(
                   statusMensagemDestinatario,
                 );
               } else if (change.type == DocumentChangeType.modified) {
                 final statusMensagemDestinatario =
                     StatusMensagemDestinatario.fromMap(change.doc.data()!);
-                await storage.adicionarOuAtualizarStatusMensagemDestinatarioLocal(
-                  statusMensagemDestinatario,
-                );
+
+                await storage
+                    .adicionarOuAtualizarStatusMensagemDestinatarioLocal(
+                      statusMensagemDestinatario,
+                    );
               } else if (change.type == DocumentChangeType.removed) {
                 final statusMensagemDestinatario =
                     StatusMensagemDestinatario.fromMap(change.doc.data()!);
+
                 await storage.removerStatusMensagemDestinatarioLocal(
                   statusMensagemDestinatario,
                 );
               }
-            });
+            }
           });
       print("numero usuarios local: ${storage.listaTodosUsuarios.length}");
     });

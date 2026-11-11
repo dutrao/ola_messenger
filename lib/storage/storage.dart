@@ -18,6 +18,11 @@ class Storage extends ChangeNotifier {
   ////Variaveis de estado
 
   List<Usuario> listaTodosUsuarios = [];
+  List<String> listaIdConversasUsuarioNuvem = [];
+  List<String> listaIdMensagensUsuarioNuvem = [];
+
+
+  //FUNÇÕES
 
   Future<void> fazerLogin(String email, String senha) async {
     await repository.fazerLogin(email, senha);
